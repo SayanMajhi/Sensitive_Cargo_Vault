@@ -1,0 +1,3 @@
+```text
+pyserial
+firebase-admin
