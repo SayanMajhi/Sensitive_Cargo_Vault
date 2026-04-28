@@ -47,6 +47,7 @@ Sensitive_Cargo_Vault/
 ├── python/
 │   ├── main.py
 │   ├── test.py
+│   ├── 
 │   └── requirements.txt
 ├── firebase/
 │   ├── sample_db.json
@@ -59,8 +60,7 @@ Sensitive_Cargo_Vault/
 │   └── setup-guide.md
 ├── images/
 │   ├── architecture.png
-│   ├── circuit.png
-│   └── demo.gif
+│   └── circuit.png
 └── README.md
 ```
 

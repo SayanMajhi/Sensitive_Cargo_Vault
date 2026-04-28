@@ -1,44 +1,36 @@
-import firebase_admin
-from firebase_admin import credentials, db
-import time
+import serial
 
-# ===== INIT =====
-cred = credentials.Certificate("key.json")
+# CHANGE THIS PORT
+PORT = '/dev/ttyUSB0'   # or /dev/ttyACM0
+BAUD = 9600
 
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://smart-sensitive-cargo-vault-default-rtdb.firebaseio.com/'
-})
+try:
+    ser = serial.Serial(PORT, BAUD, timeout=1)
+    print(f"Connected to {PORT}\n")
+except Exception as e:
+    print("Error opening serial port:", e)
+    exit()
 
-vault_ref = db.reference('vault')
-reset_ref = db.reference('reset')
-
-# ===== TEST WRITE =====
-print("Writing test data...")
-
-vault_ref.set({
-    "ST": "TEST",
-    "T": "25",
-    "G": "100",
-    "D": "40",
-    "B": "0"
-})
-
-print("Data written to Firebase")
-
-# ===== TEST READ LOOP =====
-print("Waiting for reset signal...")
+print("Listening to Arduino...\n")
 
 while True:
-    val = reset_ref.get()
-    print("Reset value:", val)
+    try:
+        line = ser.readline().decode(errors='ignore').strip()
 
-    if val == 1:
-        print("RESET detected from Firebase")
+        if not line:
+            continue
 
-        # simulate sending to Arduino
-        print("Pretend: sending RESET to Arduino")
+        print("RAW:", line)
 
-        reset_ref.set(0)
-        print("Reset cleared")
+        # Optional: simple validation
+        if line.startswith("ST:"):
+            print("VALID DATA\n")
+        else:
+            print("IGNORED (noise)\n")
 
-    time.sleep(2)
+    except KeyboardInterrupt:
+        print("\nStopped by user")
+        break
+
+    except Exception as e:
+        print("Error:", e)
