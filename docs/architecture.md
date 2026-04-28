@@ -23,11 +23,10 @@ The architecture is divided into three layers:
 ```mermaid
 flowchart LR
     Sensors --> Arduino
-    Arduino -->|Serial (Event Data)| Python
+    Arduino -->|Serial| Python
     Python --> Firebase
-    Firebase -->|Reset Command| Python
-    Python -->|Serial Command| Arduino
-```
+    Firebase -->|Reset| Python
+    Python -->|Command| Arduino
 
 ---
 
