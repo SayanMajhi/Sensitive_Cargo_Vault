@@ -1,26 +1,24 @@
-# Smart Sensitive Cargo Vault
+# System Architecture — Smart Sensitive Cargo Vault
 
-An IoT-based secure logistics monitoring system that detects environmental anomalies and physical tampering during cargo transport. The system combines embedded sensing, event-driven communication, and cloud-based control.
+## 1. Overview
 
----
+The system is a layered IoT architecture designed for secure monitoring of sensitive cargo during transport. It integrates embedded sensing, event-driven communication, and cloud-based control.
 
-## Overview
+The architecture is divided into three layers:
 
-This project implements a multi-layer architecture:
-
-* Embedded system (Arduino) for real-time monitoring and control
-* Python middleware for data parsing and communication
-* Firebase Realtime Database for cloud storage and remote commands
-
-The system operates using a finite state machine with three modes:
-
-* SECURE (Idle)
-* TRANSIT (Active Monitoring)
-* BREACH (Alarm State)
+* Embedded Layer (Arduino): Real-time sensing and state control
+* Middleware Layer (Python): Data parsing and communication bridge
+* Cloud Layer (Firebase RTDB): Storage and remote command interface
 
 ---
 
-## System Architecture
+## 2. Architecture Diagram
+
+![System Architecture](../images/architecture.png)
+
+---
+
+## 3. High-Level Data Flow
 
 ```mermaid
 flowchart LR
@@ -31,109 +29,73 @@ flowchart LR
     Python -->|Serial Command| Arduino
 ```
 
-Detailed design is available in `docs/architecture.md`.
+---
+
+## 4. Embedded Layer (Arduino)
+
+### Responsibilities
+
+* Sensor acquisition (temperature, gas, distance, tilt)
+* Finite State Machine execution
+* Breach detection and local decision-making
+* Actuation (LED PWM, buzzer)
+* EEPROM-based persistence
+* Serial communication
 
 ---
 
-## Features
+## 5. Finite State Machine
 
-* Finite State Machine-based control
-* Multi-sensor monitoring (temperature, gas, distance, tilt)
-* PWM-based thermal response
-* Event-driven serial communication
-* EEPROM-based breach persistence
-* Cloud integration using Firebase RTDB
-* Remote system reset capability
-
----
-
-## Project Structure
-
-```text
-arduino/     Embedded firmware (FSM, sensors, EEPROM)
-python/      Middleware (serial parsing, Firebase integration)
-firebase/    Sample configuration (no secrets)
-docs/        System design and architecture
-images/      Diagrams and demo assets
+```mermaid
+stateDiagram-v2
+    [*] --> SECURE
+    SECURE --> TRANSIT : Digital Key
+    TRANSIT --> BREACH : Anomaly Detected
+    BREACH --> SECURE : RESET Command
 ```
 
+### States
+
+| State   | Description       |
+| ------- | ----------------- |
+| SECURE  | Idle mode         |
+| TRANSIT | Active monitoring |
+| BREACH  | Alarm state       |
+
 ---
 
-## Setup Instructions
+## 6. Communication Protocol
 
-### 1. Arduino (or Simulation via Wokwi)
+Arduino sends structured event data:
 
-* Upload `arduino/cargo_vault.ino`
-* For simulation, use Wokwi with potentiometers replacing sensors
-
----
-
-### 2. Python Environment
-
-Install dependencies:
-
-```bash
-pip install -r python/requirements.txt
 ```
-
----
-
-### 3. Firebase Setup
-
-1. Create a Firebase project
-2. Enable Realtime Database
-3. Set rules:
-
-```json
-{
-  ".read": true,
-  ".write": true
-}
-```
-
-4. Download service account key
-5. Place it at:
-
-```text
-firebase/key.json
-```
-
----
-
-## Running the System
-
-Start middleware:
-
-```bash
-python python/main.py
-```
-
-System flow:
-
-1. Arduino sends event-based sensor data
-2. Python parses and uploads to Firebase
-3. Firebase stores current system state
-4. Remote reset triggers command back to Arduino
-
----
-
-## Data Format
-
-Arduino sends structured data:
-
-```text
 ST:<STATE>,T:<TEMP>,G:<GAS>,D:<DIST>,B:<BREACH_COUNT>
 ```
 
 Example:
 
-```text
+```
 ST:BREACH,T:30,G:400,D:60,B:2
 ```
 
 ---
 
-## Firebase Data Model
+## 7. Middleware Layer (Python)
+
+### Responsibilities
+
+* Serial data acquisition
+* Parsing structured messages
+* Filtering valid states
+* Uploading to Firebase
+* Polling remote commands
+* Sending RESET to Arduino
+
+---
+
+## 8. Cloud Layer (Firebase RTDB)
+
+### Data Model
 
 ```json
 {
@@ -150,29 +112,35 @@ ST:BREACH,T:30,G:400,D:60,B:2
 
 ---
 
-## Simulation Notes
+## 9. Remote Control Flow
 
-* Sensors are simulated using potentiometers in Wokwi
-* Tilt is simulated using a switch
-* System logic remains identical to hardware implementation
+```mermaid
+sequenceDiagram
+    participant User
+    participant Firebase
+    participant Python
+    participant Arduino
 
----
-
-## Security Note
-
-Firebase credentials (`key.json`) are excluded from version control via `.gitignore`.
-
----
-
-## Future Work
-
-* GPS-based tracking
-* Web dashboard for visualization
-* Notification system (alerts)
-* Secure authentication layer
+    User->>Firebase: set reset = 1
+    Python->>Firebase: read reset
+    Python->>Arduino: send RESET
+    Arduino->>Arduino: change state
+    Arduino->>Python: send updated state
+    Python->>Firebase: update vault
+```
 
 ---
 
-## License
+## 10. Design Characteristics
 
-This project is licensed under the MIT License.
+* Event-driven communication
+* Separation of concerns
+* Local decision-making
+* Persistent state tracking
+* Bidirectional control flow
+
+---
+
+## 11. Summary
+
+This system demonstrates integration of embedded systems, middleware processing, and cloud-based control in a modular IoT architecture.
