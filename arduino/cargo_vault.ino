@@ -138,32 +138,23 @@ void setup() {
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   pinMode(TILT_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
-
   Serial.begin(9600);
-
-  // Fix EEPROM initial value
   if (EEPROM.read(breachAddr) == 255) {
     EEPROM.write(breachAddr, 0);
   }
-
-  delay(500); // stabilize inputs
-
+  delay(500);
   sendData("SECURE");
 }
-
 // ---------------- LOOP ----------------
 void loop() {
   checkSerial();
-
   switch (currentState) {
-
     case SECURE:
       analogWrite(LED_PIN, 0);
-
       if (detectKey()) {
         currentState = TRANSIT;
 
-        delay(200); // stabilize distance reading
+        delay(200);
         baselineDist = getDistance();
 
         sendData("TRANSIT");
@@ -180,7 +171,6 @@ void loop() {
       break;
 
     case BREACH:
-      // waiting for RESET command
       break;
   }
 }
