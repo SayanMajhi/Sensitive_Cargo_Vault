@@ -23,7 +23,7 @@ vault_ref.set({
     "B": "0"
 })
 
-print("✅ Data written to Firebase")
+print("Data written to Firebase")
 
 # ===== TEST READ LOOP =====
 print("Waiting for reset signal...")
@@ -33,7 +33,7 @@ while True:
     print("Reset value:", val)
 
     if val == 1:
-        print("✅ RESET detected from Firebase")
+        print("RESET detected from Firebase")
 
         # simulate sending to Arduino
         print("Pretend: sending RESET to Arduino")
