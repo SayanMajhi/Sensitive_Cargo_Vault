@@ -2,13 +2,13 @@
 
 ## 1. Overview
 
-The system is a layered IoT architecture designed for secure monitoring of sensitive cargo during transport. It integrates embedded sensing, event-driven communication, and cloud-based control.
+This system is a layered IoT architecture designed for monitoring and securing sensitive cargo during transport.
 
-The architecture is divided into three layers:
+It consists of three primary layers:
 
-* Embedded Layer (Arduino): Real-time sensing and state control
-* Middleware Layer (Python): Data parsing and communication bridge
-* Cloud Layer (Firebase RTDB): Storage and remote command interface
+* Embedded Layer (Arduino): real-time sensing and control
+* Middleware Layer (Python): communication and data processing
+* Cloud Layer (Firebase RTDB): storage and remote control
 
 ---
 
@@ -29,116 +29,64 @@ flowchart LR
     Python -->|Command| Arduino
 ```
 
-## 4. Embedded Layer (Arduino)
+---
 
-### Responsibilities
+## 4. Layer Responsibilities
 
-* Sensor acquisition (temperature, gas, distance, tilt)
+### Embedded Layer (Arduino)
+
+* Sensor data acquisition
 * Finite State Machine execution
-* Breach detection and local decision-making
-* Actuation (LED PWM, buzzer)
-* EEPROM-based persistence
+* Local anomaly detection
+* Actuation (LED, alarm)
 * Serial communication
 
 ---
 
-## 5. Finite State Machine
+### Middleware Layer (Python)
 
-```mermaid
-stateDiagram-v2
-    [*] --> SECURE
-    SECURE --> TRANSIT : Digital Key
-    TRANSIT --> BREACH : Anomaly Detected
-    BREACH --> SECURE : RESET Command
-```
-
-### States
-
-| State   | Description       |
-| ------- | ----------------- |
-| SECURE  | Idle mode         |
-| TRANSIT | Active monitoring |
-| BREACH  | Alarm state       |
+* Serial data parsing
+* Filtering and validation
+* Firebase integration
+* Remote command handling
 
 ---
 
-## 6. Communication Protocol
+### Cloud Layer (Firebase RTDB)
 
-Arduino sends structured event data:
-
-```
-ST:<STATE>,T:<TEMP>,G:<GAS>,D:<DIST>,B:<BREACH_COUNT>
-```
-
-Example:
-
-```
-ST:BREACH,T:30,G:400,D:60,B:2
-```
+* Real-time state storage
+* Remote reset control
+* Central monitoring interface
 
 ---
 
-## 7. Middleware Layer (Python)
+## 5. Interaction Model
 
-### Responsibilities
-
-* Serial data acquisition
-* Parsing structured messages
-* Filtering valid states
-* Uploading to Firebase
-* Polling remote commands
-* Sending RESET to Arduino
+* Arduino sends event-based updates
+* Python processes and forwards data
+* Firebase stores latest system state
+* Remote commands propagate back to Arduino
 
 ---
 
-## 8. Cloud Layer (Firebase RTDB)
-
-### Data Model
-
-```json
-{
-  "vault": {
-    "ST": "BREACH",
-    "T": "30",
-    "G": "400",
-    "D": "60",
-    "B": "2"
-  },
-  "reset": 0
-}
-```
-
----
-
-## 9. Remote Control Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Firebase
-    participant Python
-    participant Arduino
-
-    User->>Firebase: set reset = 1
-    Python->>Firebase: read reset
-    Python->>Arduino: send RESET
-    Arduino->>Arduino: change state
-    Arduino->>Python: send updated state
-    Python->>Firebase: update vault
-```
-
----
-
-## 10. Design Characteristics
+## 6. Design Principles
 
 * Event-driven communication
 * Separation of concerns
-* Local decision-making
-* Persistent state tracking
-* Bidirectional control flow
+* Low-latency local decision-making
+* Modular and extensible architecture
 
 ---
 
-## 11. Summary
+## 7. Related Documents
 
-This system demonstrates integration of embedded systems, middleware processing, and cloud-based control in a modular IoT architecture.
+* State machine: `state-machine.md`
+* Data flow: `data-flow.md`
+* Pin configuration: `pin-diagram.md`
+* Setup guide: `setup-guide.md`
+
+---
+
+## 8. Summary
+
+The architecture provides a modular and scalable design, enabling reliable monitoring, efficient communication, and remote control of the system.
